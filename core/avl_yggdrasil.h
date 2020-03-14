@@ -1,6 +1,11 @@
 #ifndef CORE_AVL_YGGDRASIL_H
 #define CORE_AVL_YGGDRASIL_H
 
+/** @file core/avl_yggdrasil.h
+ *  This is an internal header file, included by other library headers.
+ *  Do not attempt to use it directly.
+ */
+
 //
 // Created by iduna on 3/5/2020.
 //
@@ -8,16 +13,33 @@
 namespace tld
 {
 	
+	/**
+	 * @brief An AVL tree class, designed for use in implementing template data containers.
+	 * @details AVL trees are balanced BS trees that allow to obtain a key in logarithmic time.
+	 * In this tree right child has the greater key and left child has the less key than root.
+	 * Warning: This tree implementation may be unsafe to use standalone.
+	 * @tparam T - value type to be stored in the tree.
+	 */
 	template <typename T>
 	class avl_tree
 	{
 	public:
+		///Tree node type offering value initialization and destruction.
 		struct tree_node
 		{
+			/// Value stored in the node.
 			T _n_value;
-			unsigned char height{};
+			
+			/// Height of the subtree with a root in this node.
+			unsigned char height;
+			
+			/// Pointer to the left child node.
 			tree_node* left;
+			
+			/// Pointer to the parent node.
 			tree_node* parent;
+			
+			/// Pointer to the right child node.
 			tree_node* right;
 			
 			tree_node();
@@ -28,6 +50,7 @@ namespace tld
 		};
 	
 	public:
+		/// Pointer to the root of the tree.
 		tree_node* root_;
 	
 	private:
@@ -77,16 +100,25 @@ namespace tld
 		
 		void Destroy();
 		
+		tree_node* Find(const T& key);
+		
 		void FindAndRemove(const T& key);
 		//void Dump();
 		//void PrintNode(tree_node* p_node);
 	};
 	
 	//TREE_NODE
+	/**
+	 * @brief Creates an empty node of height 1.
+	 */
 	template <typename T>
 	avl_tree<T>::tree_node::tree_node(): _n_value(), height(1), left(nullptr), parent(nullptr), right(nullptr)
 	{}
 	
+	/**
+	 * Copy constructor for a node.
+	 * @param that Reference to the source object.
+	 */
 	template <typename T>
 	avl_tree<T>::tree_node::tree_node(const avl_tree::tree_node& that)
 	{
@@ -97,15 +129,25 @@ namespace tld
 		this->right = nullptr;
 	}
 	
+	/**
+	 * @brief Trivial destructor.
+	 */
 	template <typename T>
 	avl_tree<T>::tree_node::~tree_node() = default;
 	
 	
 	//AVL_TREE
+	/**
+	 * @brief Generates an empty tree with null root pointer.
+	 */
 	template <typename T>
 	avl_tree<T>::avl_tree() : root_(nullptr)
 	{}
 	
+	/**
+	 * @brief Copy constructor for a tree.
+	 * @param that Reference to the source object.
+	 */
 	template <typename T>
 	avl_tree<T>::avl_tree(const avl_tree& that)
 	{
@@ -115,6 +157,9 @@ namespace tld
 			Copy(&(this->root_), *(that.root_));
 	}
 	
+	/**
+	 * @brief Recursively frees allocated memory.
+	 */
 	template <typename T>
 	avl_tree<T>::~avl_tree()
 	{
@@ -167,6 +212,9 @@ namespace tld
 		(this->*p_function)(p_node);
 	}
 	
+	/**
+	 * @brief Clear the tree: recursively frees allocated memory and sets root pointer null.
+	 */
 	template <typename T>
 	void avl_tree<T>::Destroy()
 	{
@@ -311,6 +359,11 @@ namespace tld
 		
 	}
 	
+	/**
+	 * @brief Inserts a new element into the container.
+	 * @param [in] new_value An element to insert.
+	 * @return Pointer to the node containing the element inserted.
+	 */
 	template <typename T>
 	typename avl_tree<T>::tree_node* avl_tree<T>::Insert(const T& new_value)
 	{
@@ -389,6 +442,22 @@ namespace tld
 		return nullptr;
 	}
 	
+	
+	/**
+	 * @brief Retrieves a value with specified key.
+	 * @param key Key of the element.
+	 * @return Pointer to the node containing the element is stored if found, otherwise nullptr.
+	 */
+	template <typename T>
+	typename avl_tree<Y>::tree_node* avl_tree<T>::Find(const T& key)
+	{
+		return Find(root_, key);
+	}
+	
+	/**
+	 * @brief Removes the element with specified key from the container.
+	 * @param key Key of the element.
+	 */
 	template <typename T>
 	void avl_tree<T>::FindAndRemove(const T& key)
 	{
@@ -432,6 +501,11 @@ namespace tld
 		}
 	}
 	
+	/**
+	 * @brief Copy assignment operator for a tree.
+	 * @param that Reference to the source object.
+	 * @return Reference to the tree object to create assignment chains.
+	 */
 	template <typename T>
 	avl_tree<T>& avl_tree<T>::operator =(const avl_tree& that)
 	{
@@ -446,6 +520,14 @@ namespace tld
 		return *this;
 	}
 	
+	/**
+	 * @brief Comparision operator for map type.
+	 * @param lht Left operand.
+	 * @param rht Right operand.
+	 * @return The result of comparision of the root pointers.
+	 *
+	 * @details It is used to avoid self-assignment.
+	 */
 	template <typename T>
 	inline bool operator ==(const avl_tree<T>& lht, const avl_tree<T>& rht)
 	{
