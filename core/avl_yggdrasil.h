@@ -94,6 +94,10 @@ namespace tld
 		
 		~avl_tree();
 		
+		T& Max();
+		
+		T& Min();
+		
 		avl_tree& operator =(const avl_tree& that);
 		
 		tree_node* Insert(const T& new_value);
@@ -401,7 +405,7 @@ namespace tld
 			else
 				p_node->parent->left = nullptr;
 			
-			delete (p_node);
+			delete p_node;
 		} else if (p_node->right == nullptr)
 		{
 			if (p_node->parent->right == p_node)
@@ -410,7 +414,7 @@ namespace tld
 				p_node->parent->left = p_node->left;
 			
 			p_node->left->parent = p_node->parent;
-			delete (p_node);
+			delete p_node;
 		} else if (p_node->left == nullptr)
 		{
 			if (p_node->parent->right == p_node)
@@ -419,11 +423,23 @@ namespace tld
 				p_node->parent->left = p_node->right;
 			
 			p_node->right->parent = p_node->parent;
-			delete (p_node);
+			delete p_node;
 		} else
 		{
-			p_node->_n_value = Max(p_node->left)->_n_value;
-			FindAndRemove(p_node->left, (Max(p_node->left)->_n_value));
+			tree_node* new_root = Max(p_node->left);
+			
+			new_root->left->parent = new_root->parent;
+			new_root->parent->right = new_root->left;
+			
+			if (p_node->parent->right == p_node)
+				p_node->parent->right = new_root;
+			else
+				p_node->parent->left = new_root;
+			
+			new_root->right = p_node->right;
+			new_root->left = p_node->left;
+			
+			delete p_node;
 		}
 	}
 	
@@ -449,7 +465,7 @@ namespace tld
 	 * @return Pointer to the node containing the element is stored if found, otherwise nullptr.
 	 */
 	template <typename T>
-	typename avl_tree<Y>::tree_node* avl_tree<T>::Find(const T& key)
+	typename avl_tree<T>::tree_node* avl_tree<T>::Find(const T& key)
 	{
 		return Find(root_, key);
 	}
@@ -532,6 +548,12 @@ namespace tld
 	inline bool operator ==(const avl_tree<T>& lht, const avl_tree<T>& rht)
 	{
 		return (lht.root_ == rht.root_);
+	}
+	
+	template <typename T>
+	T& avl_tree<T>::Max()
+	{
+	
 	}
 	
 } //namespace tld
